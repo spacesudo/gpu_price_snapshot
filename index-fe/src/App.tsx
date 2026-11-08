@@ -10,7 +10,7 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState('');
-  const [providerFilter, setProviderFilter] = useState<'all' | 'runpod' | 'vast'>('all');
+  const [providerFilter, setProviderFilter] = useState<'all' | 'runpod' | 'vast' | 'runcrate'>('all');
   const [sortKey, setSortKey] = useState<SortKey>('canonical_name');
   const [sortDir, setSortDir] = useState<SortDir>('asc');
 
@@ -73,6 +73,7 @@ function App() {
   const providerCounts = {
     runpod: prices.filter(p => p.provider === 'runpod').length,
     vast: prices.filter(p => p.provider === 'vast').length,
+    runcrate: prices.filter(p => p.provider === 'runcrate').length,
   };
   const cheapest = prices.length > 0
     ? prices.reduce((best, price) => price.price_per_hour < best.price_per_hour ? price : best)
@@ -118,7 +119,7 @@ function App() {
           <>
             <section className="mb-6 grid grid-cols-2 border-l border-t border-black lg:grid-cols-4">
               <Stat label="Verified models" value={String(modelCount)} />
-              <Stat label="Current listings" value={String(prices.length)} detail={`${providerCounts.runpod} RunPod · ${providerCounts.vast} Vast.ai`} />
+              <Stat label="Current listings" value={String(prices.length)} detail={`${providerCounts.runpod} RunPod · ${providerCounts.vast} Vast.ai · ${providerCounts.runcrate} Runcrate`} />
               <Stat label="Lowest current" value={cheapest ? formatPrice(cheapest.price_per_hour, cheapest.currency) : '—'} detail={cheapest ? `${cheapest.canonical_name} · ${formatProvider(cheapest.provider)}` : undefined} />
               <Stat label="Historical observations" value={observationCount.toLocaleString()} />
             </section>
@@ -133,13 +134,13 @@ function App() {
                 className="border border-black px-3 py-2 text-sm w-full sm:w-64 outline-none focus:ring-1 focus:ring-black"
               />
               <div className="flex gap-1 border border-black">
-                {(['all', 'runpod', 'vast'] as const).map(v => (
+                {(['all', 'runpod', 'vast', 'runcrate'] as const).map(v => (
                   <button
                     key={v}
                     onClick={() => setProviderFilter(v)}
                     className={`px-3 py-2 text-sm font-medium transition-colors ${providerFilter === v ? 'bg-black text-white' : 'hover:bg-neutral-100'}`}
                   >
-                    {v === 'all' ? `All ${prices.length}` : v === 'runpod' ? `RunPod ${providerCounts.runpod}` : `Vast.ai ${providerCounts.vast}`}
+                    {v === 'all' ? `All ${prices.length}` : v === 'runpod' ? `RunPod ${providerCounts.runpod}` : v === 'vast' ? `Vast.ai ${providerCounts.vast}` : `Runcrate ${providerCounts.runcrate}`}
                   </button>
                 ))}
               </div>
@@ -198,7 +199,7 @@ function App() {
 
       <footer className="border-t border-black px-6 py-4 mt-12">
         <p className="text-center text-xs text-neutral-400">
-          GPU Price Index · Data fetched hourly from RunPod &amp; Vast.ai · Prices in USD
+          GPU Price Index · Data fetched hourly from RunPod, Vast.ai &amp; Runcrate · Prices in USD
         </p>
       </footer>
     </div>
@@ -206,7 +207,7 @@ function App() {
 }
 
 function formatProvider(provider: string) {
-  return provider === 'runpod' ? 'RunPod' : provider === 'vast' ? 'Vast.ai' : provider;
+  return provider === 'runpod' ? 'RunPod' : provider === 'vast' ? 'Vast.ai' : provider === 'runcrate' ? 'Runcrate' : provider;
 }
 
 function formatPriceType(type: string) {

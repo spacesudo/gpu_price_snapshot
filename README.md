@@ -1,11 +1,12 @@
 # GPU Index
 
-Fetch GPU rental prices from [RunPod](https://www.runpod.io/) and [Vast.ai](https://vast.ai/), normalize them, and store time-series snapshots in a [Neon](https://neon.tech/) PostgreSQL database.
+Fetch GPU rental prices from [RunPod](https://www.runpod.io/), [Vast.ai](https://vast.ai/) and [Runcrate](https://www.runcrate.ai/), normalize them, and store time-series snapshots in a [Neon](https://neon.tech/) PostgreSQL database.
 
 ## Features
 
 - **RunPod**: GraphQL `gpuTypes` query for secure, community, and spot pricing
 - **Vast.ai**: REST marketplace search with per-GPU minimum on-demand and interruptible prices
+- **Runcrate**: public pricing feed with the lowest on-demand price per GPU type that is in stock (no API key needed)
 - **Neon PostgreSQL**: GPU catalog + timestamped price snapshots with JSONB raw payloads
 - **Scheduler**: Built-in interval fetching (default every 1 hour)
 
@@ -96,7 +97,7 @@ npm run dev
 
 ### Dashboard Features
 
-- **Single-page price table**: All verified GPU prices from RunPod and Vast.ai
+- **Single-page price table**: All verified GPU prices from RunPod, Vast.ai and Runcrate
 - **Historical ranges**: Each row shows the all-time low and all-time high price for that GPU and instance type
 - **Search and filters**: Search by GPU model or filter by provider
 - **Sortable columns**: Sort by GPU, provider, price, VRAM, price type, and historical ranges
@@ -113,7 +114,7 @@ The dashboard focuses on these verified GPU models:
 
 | Column | Type | Description |
 |--------|------|-------------|
-| provider | TEXT | `runpod` or `vast` |
+| provider | TEXT | `runpod`, `vast` or `runcrate` |
 | gpu_id | TEXT | Provider GPU identifier |
 | display_name | TEXT | Human-readable name |
 | memory_gb | DOUBLE PRECISION | VRAM in GB |
@@ -122,9 +123,9 @@ The dashboard focuses on these verified GPU models:
 
 | Column | Type | Description |
 |--------|------|-------------|
-| instance_type | TEXT | `secure`, `community`, `secure_spot`, `community_spot` (RunPod) or `ondemand`, `bid` (Vast.ai) |
+| instance_type | TEXT | `secure`, `community`, `secure_spot`, `community_spot` (RunPod) or `ondemand`, `bid` (Vast.ai), `ondemand` (Runcrate) |
 | price_per_hour | DOUBLE PRECISION | USD per hour |
-| stock_status | TEXT | RunPod availability or Vast.ai offer count |
+| stock_status | TEXT | RunPod availability, Vast.ai offer count, or `in_stock` (Runcrate) |
 | fetched_at | TIMESTAMPTZ | UTC timestamp |
 | raw_json | JSONB | Full provider payload for debugging |
 
@@ -134,6 +135,7 @@ The dashboard focuses on these verified GPU models:
 |----------|---------------|--------|
 | RunPod | secure, community, secure_spot, community_spot | Catalog list prices from `gpuTypes` |
 | Vast.ai | ondemand, bid | Minimum `dph_total` per `gpu_name` across rentable offers |
+| Runcrate | ondemand | `min_price_hr` per GPU type from `https://www.runcrate.ai/api/gpu-pricing`, skipped when `available_options` is below 1 |
 
 ## Error handling
 

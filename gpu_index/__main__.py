@@ -54,7 +54,7 @@ def fetch() -> None:
     results = run_fetch(config)
     click.echo(
         f"Saved {results['total']} snapshots "
-        f"(runpod={results['runpod']}, vast={results['vast']})"
+        f"(runpod={results['runpod']}, vast={results['vast']}, runcrate={results['runcrate']})"
     )
 
 
